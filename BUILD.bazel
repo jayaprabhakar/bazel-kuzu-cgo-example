@@ -1,0 +1,33 @@
+load("@gazelle//:def.bzl", "gazelle", "gazelle_test")
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+gazelle(name = "gazelle")
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=deps.bzl%go_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
+)
+
+gazelle_test(
+    name = "gazelle_test",
+    workspace = "//:BUILD.bazel",  # a file in the workspace root, where the gazelle will be run
+)
+
+go_library(
+    name = "kuzu-go-example_lib",
+    srcs = ["main.go"],
+    importpath = "kuzu-go-example",
+    visibility = ["//visibility:private"],
+    deps = ["@com_github_kuzudb_go_kuzu//:go-kuzu"],
+)
+
+go_binary(
+    name = "kuzu-go-example",
+    embed = [":kuzu-go-example_lib"],
+    visibility = ["//visibility:public"],
+)
