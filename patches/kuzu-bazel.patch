@@ -1,0 +1,28 @@
+--- BUILD.bazel	2025-09-02 17:12:47
++++ BUILD.bazel	2025-09-02 18:43:54
+@@ -1,5 +1,17 @@
+ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+ 
++cc_library(
++    name = "dynamic_libs",
++    srcs = select({
++        "@io_bazel_rules_go//go/platform:darwin": ["lib/dynamic/darwin/libkuzu.dylib"],
++        "@io_bazel_rules_go//go/platform:windows": ["lib/dynamic/windows/kuzu_shared.dll", "lib/dynamic/windows/kuzu_shared.lib"],
++        "@io_bazel_rules_go//go/platform:linux_amd64":["lib/dynamic/linux-amd64/libkuzu.so"],
++        "@io_bazel_rules_go//go/platform:linux_arm64":["lib/dynamic/linux-arm64/libkuzu.so"],
++     
++    }),
++)
++
++
+ go_library(
+     name = "go-kuzu",
+     srcs = [
+@@ -14,6 +26,7 @@
+         "time_helper.go",
+         "value_helper.go",
+     ],
++    cdeps = [":dynamic_libs"],
+     cgo = True,
+     clinkopts = select({
+         "@io_bazel_rules_go//go/platform:darwin": [
